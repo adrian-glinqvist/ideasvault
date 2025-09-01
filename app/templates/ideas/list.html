@@ -1,0 +1,68 @@
+<!-- Ideas list partial for Datastar updates -->
+{% for idea in ideas %}
+<div class="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
+    <!-- Idea header -->
+    <div class="flex justify-between items-start mb-3">
+        <div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-1">
+                <a href="/ideas/{{ idea.id }}" class="hover:text-blue-600">
+                    {{ idea.title }}
+                </a>
+            </h3>
+            <div class="flex items-center gap-2 text-sm text-gray-500">
+                <span class="badge badge-secondary">{{ idea.category }}</span>
+                <span>{{ idea.created_at.strftime('%b %d, %Y') }}</span>
+                {% if not idea.is_anonymous and idea.user %}
+                    <span>by {{ idea.user.username or 'Anonymous' }}</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Idea description -->
+    <p class="text-gray-700 mb-4 line-clamp-3">
+        {{ idea.description[:200] }}{% if idea.description|length > 200 %}...{% endif %}
+    </p>
+
+    <!-- Tags -->
+    {% if idea.tags %}
+    <div class="mb-4">
+        {% for tag in idea.tags.split(',') if idea.tags %}
+        <span class="badge badge-outline mr-2">{{ tag.strip() }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Vote buttons and stats -->
+    <div class="flex justify-between items-center">
+        <div class="flex items-center space-x-2" id="vote-buttons-{{ idea.id }}">
+            <button 
+                class="btn btn-sm btn-outline"
+                data-on-click="@patch('/ideas/{{ idea.id }}/vote', {vote_type: 1})"
+                data-target="#vote-buttons-{{ idea.id }}"
+            >
+                ▲ {{ idea.vote_count if idea.vote_count > 0 else '' }}
+            </button>
+            <span class="text-sm text-gray-500">{{ idea.vote_count }} votes</span>
+            <button 
+                class="btn btn-sm btn-outline"
+                data-on-click="@patch('/ideas/{{ idea.id }}/vote', {vote_type: -1})"
+                data-target="#vote-buttons-{{ idea.id }}"
+            >
+                ▼
+            </button>
+        </div>
+
+        <div class="flex items-center text-sm text-gray-500">
+            <span>{{ idea.view_count }} views</span>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="col-span-full text-center py-12">
+    <div class="text-gray-500">No ideas found. Be the first to share an idea!</div>
+    <button class="btn btn-primary mt-4" data-on-click="@get('/ideas/new')">
+        Share Your Idea
+    </button>
+</div>
+{% endfor %}
