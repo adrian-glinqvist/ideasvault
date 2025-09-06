@@ -49,6 +49,16 @@ async def list_ideas(
         {"request": request, "ideas": ideas, "category": category, "sort": sort}
     )
 
+@router.get("/ideas/new", response_class=HTMLResponse)
+async def new_idea_form(
+    request: Request,
+    current_user = Depends(get_current_user_optional)
+):
+    return templates.TemplateResponse("ideas/new.html", {
+        "request": request,
+        "current_user": current_user
+    })
+
 @router.post("/ideas", response_class=HTMLResponse)
 async def create_idea(
     request: Request,

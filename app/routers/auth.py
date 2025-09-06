@@ -84,6 +84,20 @@ async def login(
         "token": access_token
     })
 
+@router.get("/register", response_class=HTMLResponse)
+async def register_form(request: Request):
+    return templates.TemplateResponse("auth/register.html", {"request": request})
+
+@router.get("/login", response_class=HTMLResponse)
+async def login_form(request: Request):
+    return templates.TemplateResponse("auth/login.html", {"request": request})
+
+@router.get("/logout", response_class=HTMLResponse)
+async def logout(request: Request):
+    response = templates.TemplateResponse("partials/logout_success.html", {"request": request})
+    response.delete_cookie("auth_token")
+    return response
+
 @router.get("/profile", response_class=HTMLResponse)
 async def profile(
     request: Request,
