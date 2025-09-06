@@ -3,15 +3,15 @@
 {% block content %}
 <div data-store='{"sort": "trending", "category": "all"}'>
     <!-- Hero section -->
-    <div class="text-center mb-12">
+    <div class="text-center mb-12 p-8 bg-white rounded-lg shadow-sm">
         <h2 class="text-4xl font-bold text-gray-900 mb-4">
             Discover Amazing Startup Ideas
         </h2>
         <p class="text-xl text-gray-600 mb-8">
             Share your innovative ideas and vote on concepts that inspire you
         </p>
-        <button class="btn btn-primary btn-lg" data-on-click="@get('/ideas/new')">
-            Share Your Idea
+        <button class="btn btn-primary" style="padding: 0.75rem 2rem; font-size: 1.125rem;" data-on-click="@get('/ideas/new')">
+            💡 Share Your Idea
         </button>
     </div>
 
@@ -20,30 +20,30 @@
         <div class="flex flex-wrap gap-4 items-center justify-between">
             <!-- Category filters -->
             <div class="flex flex-wrap gap-2">
-                <button class="btn btn-sm" data-on-click="@patch('/ideas?category=all')" data-class="{active: $sort === 'all'}">
-                    All Categories
+                <button class="btn btn-sm btn-primary" data-on-click="@get('/ideas?category=all')">
+                    📋 All Categories
                 </button>
-                <button class="btn btn-sm btn-outline" data-on-click="@patch('/ideas?category=saas')">
-                    SaaS
+                <button class="btn btn-sm btn-outline" data-on-click="@get('/ideas?category=saas')">
+                    💻 SaaS
                 </button>
-                <button class="btn btn-sm btn-outline" data-on-click="@patch('/ideas?category=fintech')">
-                    FinTech
+                <button class="btn btn-sm btn-outline" data-on-click="@get('/ideas?category=fintech')">
+                    💳 FinTech
                 </button>
-                <button class="btn btn-sm btn-outline" data-on-click="@patch('/ideas?category=healthtech')">
-                    HealthTech
+                <button class="btn btn-sm btn-outline" data-on-click="@get('/ideas?category=healthtech')">
+                    🏥 HealthTech
                 </button>
-                <button class="btn btn-sm btn-outline" data-on-click="@patch('/ideas?category=ecommerce')">
-                    E-commerce
+                <button class="btn btn-sm btn-outline" data-on-click="@get('/ideas?category=ecommerce')">
+                    🛒 E-commerce
                 </button>
             </div>
 
             <!-- Sort options -->
             <div class="flex gap-2">
-                <select class="select" data-on-change="@patch('/ideas?sort=' + event.target.value)">
-                    <option value="trending">Trending</option>
-                    <option value="newest">Newest</option>
-                    <option value="popular">Most Popular</option>
-                    <option value="controversial">Controversial</option>
+                <select class="select" data-on-change="@get('/ideas?sort=' + event.target.value)" style="min-width: 150px;">
+                    <option value="trending">🔥 Trending</option>
+                    <option value="newest">🆕 Newest</option>
+                    <option value="popular">⭐ Most Popular</option>
+                    <option value="controversial">💬 Controversial</option>
                 </select>
             </div>
         </div>
@@ -52,15 +52,17 @@
     <!-- Ideas grid -->
     <div id="ideas-container" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <!-- Ideas will be loaded here via Datastar -->
-        <div class="col-span-full text-center py-12">
-            <div class="text-gray-500">Loading ideas...</div>
+        <div class="col-span-full text-center py-12 bg-white rounded-lg shadow-sm">
+            <div class="animate-spin inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full mb-4"></div>
+            <div class="text-gray-500 text-lg">🚀 Loading amazing ideas...</div>
+            <p class="text-gray-400 text-sm mt-2">Discovering the next big startup concepts</p>
         </div>
     </div>
 
     <!-- Load more button -->
     <div class="text-center mt-8">
-        <button class="btn btn-outline" data-on-click="@get('/ideas?offset=10')">
-            Load More Ideas
+        <button class="btn btn-outline" data-on-click="@get('/ideas?offset=10')" style="padding: 0.75rem 1.5rem;">
+            📚 Load More Ideas
         </button>
     </div>
 </div>
@@ -68,8 +70,32 @@
 <!-- Auto-load ideas on page load -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Trigger initial ideas load
-        window.datastar.get('/ideas');
+        // Use Datastar to load ideas into the container
+        const container = document.getElementById('ideas-container');
+        if (container && window.datastar) {
+            // Use Datastar's data-on-load equivalent
+            container.setAttribute('data-on-load', '@get("/ideas")');
+            // Manually trigger the load
+            setTimeout(() => {
+                fetch('/ideas')
+                    .then(response => response.text())
+                    .then(html => {
+                        container.innerHTML = html;
+                    })
+                    .catch(error => {
+                        console.error('Error loading ideas:', error);
+                        container.innerHTML = `
+                            <div class="col-span-full text-center py-12 bg-white rounded-lg shadow-sm">
+                                <div class="text-red-500 text-lg">❌ Error loading ideas</div>
+                                <p class="text-gray-500 mt-2">Please try refreshing the page</p>
+                                <button class="btn btn-primary mt-4" onclick="location.reload()">
+                                    🔄 Refresh Page
+                                </button>
+                            </div>
+                        `;
+                    });
+            }, 1000);
+        }
     });
 </script>
 {% endblock %}
