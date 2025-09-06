@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - {{ user.username }} - IdeasVault{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Profile Header -->
+    <div class="bg-white rounded-lg shadow-sm p-8 mb-8">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">{{ user.username }}</h1>
+                <p class="text-gray-600 mt-1">{{ user.email }}</p>
+                <p class="text-sm text-gray-500 mt-1">
+                    Member since {{ user.created_at.strftime('%B %Y') }}
+                </p>
+            </div>
+            <div class="text-right">
+                <div class="text-2xl font-bold text-blue-600">{{ user_ideas|length }}</div>
+                <div class="text-sm text-gray-500">Ideas shared</div>
+            </div>
+        </div>
+        
+        <div class="flex space-x-4">
+            <button class="btn btn-primary" data-on-click="@get('/ideas/new')">
+                Share New Idea
+            </button>
+            <button class="btn btn-outline" data-on-click="@get('/auth/logout')">
+                Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- User's Ideas -->
+    <div class="bg-white rounded-lg shadow-sm p-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-6">Your Ideas</h2>
+        
+        {% if user_ideas %}
+        <div class="space-y-6">
+            {% for idea in user_ideas %}
+            <div class="border border-gray-200 rounded-lg p-6">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                            <a href="/ideas/{{ idea.id }}" class="hover:text-blue-600">{{ idea.title }}</a>
+                        </h3>
+                        <p class="text-gray-600 mb-3">
+                            {{ idea.description[:150] }}{% if idea.description|length > 150 %}...{% endif %}
+                        </p>
+                        <div class="flex items-center space-x-4 text-sm text-gray-500">
+                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">{{ idea.category }}</span>
+                            <span>{{ idea.view_count }} views</span>
+                            <span>{{ idea.created_at.strftime('%b %d, %Y') }}</span>
+                            <span class="{% if idea.status == 'active' %}text-green-600{% else %}text-red-600{% endif %}">
+                                {{ idea.status.title() }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2 ml-4">
+                        <div class="text-center">
+                            <div class="font-semibold text-lg {% if idea.vote_count > 0 %}text-green-600{% elif idea.vote_count < 0 %}text-red-600{% else %}text-gray-600{% endif %}">
+                                {{ idea.vote_count }}
+                            </div>
+                            <div class="text-xs text-gray-500">votes</div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if idea.tags %}
+                <div class="flex flex-wrap gap-1 mt-3">
+                    {% for tag in idea.tags.split(',') if idea.tags %}
+                    <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">{{ tag.strip() }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No ideas yet</h3>
+            <p class="mt-1 text-sm text-gray-500">
+                Share your first startup idea with the community!
+            </p>
+            <div class="mt-6">
+                <button class="btn btn-primary" data-on-click="@get('/ideas/new')">
+                    Share Your First Idea
+                </button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

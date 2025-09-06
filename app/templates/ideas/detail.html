@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}{{ idea.title }} - IdeasVault{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Back link -->
+    <div class="mb-6">
+        <a href="/" class="text-blue-600 hover:text-blue-700 flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Back to Ideas
+        </a>
+    </div>
+
+    <!-- Main idea content -->
+    <div class="bg-white rounded-lg shadow-sm p-8">
+        <!-- Header -->
+        <div class="flex justify-between items-start mb-6">
+            <div class="flex-1">
+                <h1 class="text-3xl font-bold text-gray-900 mb-4">{{ idea.title }}</h1>
+                <div class="flex items-center space-x-4 text-sm text-gray-500 mb-4">
+                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium">{{ idea.category }}</span>
+                    <span>{{ idea.view_count }} views</span>
+                    <span>{{ idea.created_at.strftime('%B %d, %Y at %I:%M %p') }}</span>
+                    {% if not idea.is_anonymous and idea.user %}
+                    <span>by <span class="font-medium">{{ idea.user.username }}</span></span>
+                    {% else %}
+                    <span>by Anonymous</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Vote section -->
+            <div class="flex flex-col items-center space-y-2 ml-6" id="vote-buttons-{{ idea.id }}">
+                <button 
+                    class="btn btn-sm {% if user_vote == 1 %}btn-primary{% else %}btn-outline{% endif %}"
+                    data-on-click="@patch('/ideas/{{ idea.id }}/vote', {vote_type: 1})"
+                    data-target="#vote-buttons-{{ idea.id }}"
+                    {% if not current_user %}disabled title="Login to vote"{% endif %}
+                >
+                    ▲
+                </button>
+                <span class="text-xl font-bold {% if idea.vote_count > 0 %}text-green-600{% elif idea.vote_count < 0 %}text-red-600{% else %}text-gray-600{% endif %}">
+                    {{ idea.vote_count }}
+                </span>
+                <button 
+                    class="btn btn-sm {% if user_vote == -1 %}btn-primary{% else %}btn-outline{% endif %}"
+                    data-on-click="@patch('/ideas/{{ idea.id }}/vote', {vote_type: -1})"
+                    data-target="#vote-buttons-{{ idea.id }}"
+                    {% if not current_user %}disabled title="Login to vote"{% endif %}
+                >
+                    ▼
+                </button>
+            </div>
+        </div>
+
+        <!-- Description -->
+        <div class="prose max-w-none mb-6">
+            <p class="text-gray-700 text-lg leading-relaxed whitespace-pre-line">{{ idea.description }}</p>
+        </div>
+
+        <!-- Tags -->
+        {% if idea.tags %}
+        <div class="mb-6">
+            <h3 class="text-sm font-medium text-gray-900 mb-2">Tags</h3>
+            <div class="flex flex-wrap gap-2">
+                {% for tag in idea.tags.split(',') if idea.tags %}
+                <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">{{ tag.strip() }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Actions -->
+        <div class="pt-6 border-t border-gray-200">
+            <div class="flex justify-between items-center">
+                <div class="text-sm text-gray-500">
+                    Idea #{{ idea.id }}
+                </div>
+                <div class="space-x-2">
+                    {% if not current_user %}
+                    <p class="text-sm text-gray-500">
+                        <a href="/auth/login" class="text-blue-600 hover:text-blue-700">Login</a> to vote and interact
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

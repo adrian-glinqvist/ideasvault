@@ -6,7 +6,8 @@ from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import os
 
-from ..models import User
+from ..models import User, get_db
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -36,21 +37,24 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 async def get_current_user_optional(
     request: Request,
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    db: AsyncSession = Depends(get_db)
 ) -> Optional[User]:
     if not credentials:
         return None
     
     try:
         payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: int = payload.get("sub")
+        user_id: str = payload.get("sub")
         if user_id is None:
             return None
     except JWTError:
         return None
     
-    # TODO: Fetch user from database
-    return None
+    # Fetch user from database
+    from sqlalchemy import select
+    result = await db.execute(select(User).where(User.id == int(user_id)))
+    return result.scalar_one_or_none()
 
 async def get_current_user(current_user: User = Depends(get_current_user_optional)) -> User:
     if current_user is None:

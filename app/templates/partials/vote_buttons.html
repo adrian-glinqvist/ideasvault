@@ -1,0 +1,21 @@
+<div class="flex items-center space-x-2" id="vote-buttons-{{ idea.id }}">
+    <button 
+        class="btn btn-sm {% if user_vote == 1 %}btn-primary{% else %}btn-outline{% endif %}"
+        data-on-click="@patch('/ideas/{{ idea.id }}/vote', {vote_type: 1})"
+        data-target="#vote-buttons-{{ idea.id }}"
+        {% if not current_user %}disabled title="Login to vote"{% endif %}
+    >
+        ▲
+    </button>
+    <span class="text-sm font-medium {% if idea.vote_count > 0 %}text-green-600{% elif idea.vote_count < 0 %}text-red-600{% else %}text-gray-600{% endif %}">
+        {{ idea.vote_count }}
+    </span>
+    <button 
+        class="btn btn-sm {% if user_vote == -1 %}btn-primary{% else %}btn-outline{% endif %}"
+        data-on-click="@patch('/ideas/{{ idea.id }}/vote', {vote_type: -1})"
+        data-target="#vote-buttons-{{ idea.id }}"
+        {% if not current_user %}disabled title="Login to vote"{% endif %}
+    >
+        ▼
+    </button>
+</div>
